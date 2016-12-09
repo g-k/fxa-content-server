@@ -117,7 +117,9 @@ define(function (require, exports, module) {
         // fxaClient depends on the relier and
         // inter tab communication.
         .then(_.bind(this.initializeFxaClient, this))
-        // depends on iframeChannel and interTabChannel
+        // depends on nothing
+        .then(_.bind(this.initializeWebChannel, this))
+        // depends on iframeChannel and interTabChannel, web channel
         .then(_.bind(this.initializeNotifier, this))
         // assertionLibrary depends on fxaClient
         .then(_.bind(this.initializeAssertionLibrary, this))
@@ -367,19 +369,40 @@ define(function (require, exports, module) {
           storage: this._getStorageInstance(),
           uniqueUserId: this._getUniqueUserId()
         });
+
+        return this._getCurrentUserFromBrowser();
       }
+    },
+
+    initializeWebChannel () {
+      this._notificationWebChannel =
+            new WebChannel(Constants.ACCOUNT_UPDATES_WEBCHANNEL_ID);
+      this._notificationWebChannel.initialize();
+    },
+
+    _getCurrentUserFromBrowser () {
+      return this._notificationWebChannel.request('fxaccounts:handshake')
+        .then((response) => {
+          const userData = response.signedInUser;
+          if (userData) {
+            let account = this._user.initAccount({
+              email: userData.email,
+              sessionToken: userData.sessionToken,
+              sessionTokenContext: Constants.SESSION_TOKEN_USED_FOR_SYNC,
+              uid: userData.uid,
+              verified: userData.verified
+            });
+            return this._user.setSignedInAccount(account);
+          }
+        });
     },
 
     initializeNotifier () {
       if (! this._notifier) {
-        const notificationWebChannel =
-              new WebChannel(Constants.ACCOUNT_UPDATES_WEBCHANNEL_ID);
-        notificationWebChannel.initialize();
-
         this._notifier = new Notifier({
           iframeChannel: this._iframeChannel,
           tabChannel: this._interTabChannel,
-          webChannel: notificationWebChannel
+          webChannel: this._notificationWebChannel
         });
       }
     },
