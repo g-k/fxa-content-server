@@ -17,6 +17,7 @@ define(function (require, exports, module) {
   const requireOnDemand = require('lib/require-on-demand');
   const Session = require('lib/session');
   const SignInReasons = require('lib/sign-in-reasons');
+  const SmsErrors = require('lib/sms-errors');
   const VerificationReasons = require('lib/verification-reasons');
   const VerificationMethods = require('lib/verification-methods');
 
@@ -588,6 +589,32 @@ define(function (require, exports, module) {
      */
     rejectUnblockCode: withClient((client, uid, unblockCode) => {
       return client.rejectUnblockCode(uid, unblockCode);
+    }),
+
+    /**
+     * Send an SMS
+     *
+     * @param {String} sessionToken - account session token.
+     * @param {String} phoneNumber - target phone number
+     * @param {Number} messageId - ID of message to send.
+     * @param {Object} [options]
+     *   @param {String} [options.metricsContext] - context metadata for use in
+     *                   flow events
+     * @returns {Promise}
+     */
+    sendSms: withClient((client, sessionToken, phoneNumber, messageId, options = {}) => {
+      // US/CA phone numbers require the +1 country code prefix.
+      if (! /^\+/.test(phoneNumber)) {
+        phoneNumber = `+1${phoneNumber}`;
+      }
+
+      return client.sendSms(sessionToken, phoneNumber, messageId, options)
+        .fail((err) => {
+          if (AuthErrors.is(err, 'SMS_REJECTED')) {
+            throw SmsErrors.toError(parseInt(err.reasonCode, 10));
+          }
+          throw err;
+        });
     })
   };
 

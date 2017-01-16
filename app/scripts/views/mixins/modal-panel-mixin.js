@@ -17,6 +17,16 @@ define(function (require, exports, module) {
   module.exports = {
     isModal: true,
 
+    triggers: {
+      'destroy': 'closePanel'
+    },
+
+    notifications: {
+      'navigate': 'closePanel',
+      'navigate-back': 'closePanel',
+      'navigate-from-child-view': 'closePanel'
+    },
+
     /**
      * Open the panel.
      */
@@ -53,7 +63,6 @@ define(function (require, exports, module) {
       // be called on every close.
       if (event.target === event.currentTarget) {
         this.closePanel();
-
         /**
          * Triggered if the user clicks the black background area of the modal.
          *
@@ -67,22 +76,6 @@ define(function (require, exports, module) {
       this.destroy(true);
       this.trigger('modal-cancel');
       $('.blocker').off('click', this._boundBlockerClick);
-    },
-
-    /**
-     * Wrap the navigate function to close the panel. If the next view
-     * is also a modal, a new modal will immediately be created.
-     */
-    navigate () {
-      this.closePanel();
-    },
-
-    /**
-     * Wrap the destroy function to close the panel, if it has not
-     * already been done.
-     */
-    destroy () {
-      this.closePanel();
     }
   };
 });

@@ -119,6 +119,8 @@ define(function (require, exports, module) {
      */
     viewName: '',
 
+    triggers: {},
+
     constructor: function (options) {
       options = options || {};
 
@@ -167,6 +169,10 @@ define(function (require, exports, module) {
 
       this._boundCheckAuthorization = this.checkAuthorization.bind(this);
       $(this.window).on('focus', this._boundCheckAuthorization);
+
+      for (let triggerName in this.triggers) {
+        this.on(triggerName, (...args) => this.invokeHandler(this.triggers[triggerName], ...args));
+      }
     },
 
     /**

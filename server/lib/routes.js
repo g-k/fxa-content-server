@@ -34,8 +34,8 @@ module.exports = function (config, i18n) {
     require('./routes/get-version.json'),
     require('./routes/post-metrics')(),
     require('./routes/post-metrics-errors')(),
-    require('./routes/redirect-complete-to-verified')(),
-    require('./routes/get-500')(config)
+    require('./routes/get-500')(config),
+    require('./routes/redirect-complete-to-verified')()
   ];
 
   if (config.get('csp.enabled')) {

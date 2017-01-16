@@ -215,6 +215,10 @@ The event stream is a log of events and the time they occurred while the user is
 * error.reset_password.auth.1011 - user did not enter an email address
 * error.reset_password.auth.1023 - user entered an email address that was invalid
 
+#### send_sms
+* error.send_sms.auth.1049 - user did not enter a phone number
+* error.send_sms.auth.1050 - entered phone number is invalid
+
 #### settings
 * settings.signout.submit - user clicked signout
 * settings.signout.success - user successfully signed out
