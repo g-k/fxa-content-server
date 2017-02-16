@@ -551,6 +551,8 @@ define(function (require, exports, module) {
         return this.destroyAccountDevice(account, client);
       } else if (client.get('clientType') === Constants.CLIENT_TYPE_OAUTH_APP) {
         return this.destroyAccountApp(account, client);
+      } else if (client.get('clientType') === Constants.CLIENT_TYPE_WEB_SESSION) {
+        return this.destroyAccountSession(account, client);
       }
     },
 
@@ -602,6 +604,22 @@ define(function (require, exports, module) {
       return account.destroyDevice(device)
         .then(() => {
           if (this.isSignedInAccount(account) && device.get('isCurrentDevice')) {
+            this.clearSignedInAccount();
+          }
+        });
+    },
+
+    /**
+     * Destroy a session on the given account. If it is the current session, sign out the user.
+     *
+     * @param {Object} account - account with the device
+     * @param {Object} webSession - session to destroy
+     * @returns {Promise} resolves when the action completes
+     */
+    destroyAccountSession (account, webSession) {
+      return account.destroySession(webSession)
+        .then(() => {
+          if (this.isSignedInAccount(account) && webSession.get('isCurrentSession')) {
             this.clearSignedInAccount();
           }
         });
